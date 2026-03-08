@@ -6,7 +6,7 @@ from albumentations.pytorch import ToTensorV2
 from model_multihead_mbv3 import MultiHeadFloodNetLite
 
 # --- CONFIGURATION ---
-MODEL_PATH = r"C:\Users\Ahmad\PycharmProjects\PythonProject\MoistMachine\checkpoints_refined\best_balanced_model.pth"
+MODEL_PATH = r"C:\Users\Ahmad\PycharmProjects\PythonProject\MoistMachine\checkpoints\best_fp32.pth"
 IMAGE_PATH = r"C:\Users\Ahmad\PycharmProjects\PythonProject\images\provewajiwrong.png"
 IMG_SIZE = 256
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -69,7 +69,7 @@ def main():
     print(f"Loading model from {MODEL_PATH}...")
 
     # Initialize Model
-    model = MultiHeadFloodNetLite(num_classes=10, pretrained=False, k_clusters=10).to(DEVICE)
+    model = MultiHeadFloodNetLite(num_classes=10, pretrained=False, k_clusters=0).to(DEVICE)
 
     # Load Weights
     state_dict = torch.load(MODEL_PATH, map_location=DEVICE)

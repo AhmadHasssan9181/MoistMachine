@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
 
-
 class UpConv(nn.Module):
     def __init__(self, in_ch, out_ch):
         super().__init__()
@@ -20,15 +19,12 @@ class UpConv(nn.Module):
 class MultiHeadFloodNetLite(nn.Module):
     def __init__(self, num_classes=10, pretrained=True, k_clusters=0):
         super().__init__()
-        # FIX: Handle deprecated "pretrained" arg gracefully
         weights = "IMAGENET1K_V1" if pretrained else None
         mbv3 = models.mobilenet_v3_small(weights=weights)
         self.encoder = mbv3.features
         self.num_classes = num_classes
         self.k_clusters = k_clusters
 
-        # --- FIX: CORRECT LAYERS FOR MOBILENET-V3-SMALL ---
-        # The standard encoder only goes up to index 12.
         # Layer 0: Stride 2 (H/2)  -> 16 ch
         # Layer 3: Stride 4 (H/4)  -> 24 ch
         # Layer 8: Stride 8 (H/8)  -> 48 ch
