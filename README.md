@@ -62,16 +62,16 @@ Manual pixel-annotation of 1,500+ oblique disaster drone scenes would require hu
 
 ```mermaid
 flowchart TD
-    Raw["Raw 4K Drone Footage (39 Flights, 4,149 Frames)"] --> Filter["Laplacian Blur (σ² ≥ 110) + dHash Deduplication"]
+    Raw["Raw 4K Drone Footage (39 Flights, 4,149 Frames)"] --> Filter["Laplacian Blur Filtering and dHash Deduplication"]
     Filter --> Clean["2,238 Filtered High-Res Frames"]
     
-    Clean --> VLM["Frontier VLM (Constrained CoT, reasoning_effort='low')"]
-    VLM --> |Normalized Boxes [0, 1000]⁴| Gate["Negative Constraint & Usability Filter"]
+    Clean --> VLM["Frontier VLM (Constrained CoT, low reasoning)"]
+    VLM -->|"Normalized Box Coordinates"| Gate["Negative Constraint and Usability Gate"]
     
     Gate --> Queue["Priority-Ordered Paint Queue (SAM 2.1 Hiera-Large)"]
-    Queue --> |Water ➔ Crops ➔ Roads ➔ Buildings ➔ Trees| Paint["Sub-Pixel Mask Synthesis"]
-    Paint --> Morph["Morphological Closing & Integrity Gate"]
-    Morph --> PakFlood["PakFlood-1.5K (1,510 High-Res Verified Pairs)"]
+    Queue -->|"Water > Crops > Roads > Buildings > Trees"| Paint["Sub-Pixel Mask Synthesis"]
+    Paint --> Morph["Morphological Closing and Integrity Gate"]
+    Morph --> PakFlood["PakFlood-1.5K (1,510 Verified Image/Mask Pairs)"]
 ```
 
 ### Key Innovations of the Data Engine
@@ -110,13 +110,13 @@ The dataset defines a **10-class humanitarian search-and-rescue taxonomy**:
 ## 🧠 MoistViT Architecture
 
 ```mermaid
-graph TD
-    Input["Disaster Drone Frame (512×512 / 768×768)"] --> Backbone["EfficientViT-B2 Backbone (Cascaded Linear Attention)"]
-    Backbone --> |C2: 1/4, C3: 1/8, C4: 1/16, C5: 1/32| TRFPN["Tri-Receptive Field FPN (Dilations: r = 1, 3, 5)"]
+flowchart TD
+    Input["Disaster Drone Frame (512x512 / 768x768)"] --> Backbone["EfficientViT-B2 Backbone (Cascaded Linear Attention)"]
+    Backbone -->|"Multi-Scale Feature Maps (C2, C3, C4, C5)"| TRFPN["Tri-Receptive Field FPN (Dilations r = 1, 3, 5)"]
     TRFPN --> Fusion["Cross-Scale High-Resolution Feature Fusion (128-dim)"]
     
-    Fusion --> Head1["Dense Head: 10-Class Triage Logits [10, H, W]"]
-    Fusion --> Head2["Threat Head: Global Hazard Index [0, 1]"]
+    Fusion --> Head1["Dense Head: 10-Class Triage Logits"]
+    Fusion --> Head2["Threat Head: Global Hazard Index"]
 ```
 
 ### 1. Cascaded Linear Attention
